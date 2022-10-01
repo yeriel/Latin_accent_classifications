@@ -63,7 +63,7 @@ def mkdirs(newdir,mode=777):
     except OSError as err:
         return err
 
-def new_order(M,F,src='Train/',dir='#Train/'):
+def new_order(M,F,src,dir):
 
     countries = M.keys()
 
@@ -157,7 +157,7 @@ def new_dataset_csv(paths):
                     continue
     return df
 
-def new_dataset(paths, dst='Train/'):
+def new_dataset(paths, dst, temp='../dataset/#Train/'):
     
     shutil.rmtree(dst)
     mkdirs(dst,mode=777)
@@ -167,37 +167,38 @@ def new_dataset(paths, dst='Train/'):
             for file in os.listdir(f'{path}/{country}'):
                 shutil.move(f'{path}/{country}/{file}',dst)
     
-    shutil.rmtree('#Train/')
+    shutil.rmtree(temp)
 
 if __name__ == "__main__":
-
-    print(f'this process takes approximately 10 minutes\nunzip folder')
-    unzip_folder('clasificacion-de-acentos-latinos.zip','.',pwd='')
-    print(f'done')
     
-    df_train = pd.read_csv('Train.csv')
+    print(f'\nthis process takes approximately 10 minutes\nunzip folder\n')
+    unzip_folder('../dataset/clasificacion-de-acentos-latinos.zip','../dataset/',pwd='')
+    print(f'done\n')
+    
+    df_train = pd.read_csv('../dataset/Train.csv')
     sumM,sumF,M,F = check_dataset(df_train)
 
     print(f'Original Dataset\nM\tF\tkey')
     for key,m,f in zip(M.keys(),M.values(),F.values()):
         print(f'{len(m)}\t{len(f)}\t{key}')
-    print(f'M_total : {sumM}\tF_total : {sumF}')
+    print(f'M_total : {sumM}\tF_total : {sumF}\n')
     
     print(f'sorting the dataset files')
-    new_order(M,F)
-    print(f'sorting done')
+    new_order(M,F,'../dataset/Train/','../dataset/#Train/')
+    print(f'sorting done\n')
 
     print(f'upsampling and data aumentation dataset')
-    paths = ['#Train/F','#Train/M']
+    paths = ['../dataset/#Train/F','../dataset/#Train/M']
     for path in paths:
         upsampling(path)
         data_aumentation(path)
-    print(f'done')
-    
+    print(f'done\n')
+
+    paths = ['../dataset/#Train/F','../dataset/#Train/M']
     print(f'crate Train.csv')
     df = new_dataset_csv(paths)
-    df.to_csv('Train.csv',index=False)
-    new_dataset(paths)
-    print(f'done')
-    print(f'New Dataset\n{df.info()}')
-
+    df.to_csv('../dataset/Train.csv',index=False)
+    new_dataset(paths,'../dataset/Train/')
+    print(f'done\n')
+    print(f'New Dataset\n')
+    print(f'{df.info()}')
