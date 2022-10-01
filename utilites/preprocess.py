@@ -1,15 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import os
 import math
 import shutil
 import zipfile
-
-import numpy as np
-import pandas as pd
-
 import librosa
+import pandas as pd
 import soundfile as sf
 from audiomentations import Compose, AddGaussianNoise, HighPassFilter
 
@@ -115,44 +109,44 @@ def data_aumentation(path):
             aumentation(f'{path}/{country}/{path_file}')
 
 def new_dataset_csv(paths):
-    columns_ = ['id','F', 'M', 'Argentina', 'Chile', 'Colombia', 'Peru', 'Venezuela']
+    columns_ = ['Id','Sex', 'Country']
     df = pd.DataFrame(columns = columns_)
     
     for path in paths:
         for country in os.listdir(path):
             for file in os.listdir(f'{path}/{country}'):
-                if path[-1] == 'F':
+                if path[-1] == 'M':
                     if country == 'Argentina':
-                        df_ = pd.DataFrame([[file,1,0,1,0,0,0,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,1,2]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Chile':
-                        df_ = pd.DataFrame([[file,1,0,0,1,0,0,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,1,3]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Colombia':
-                        df_ = pd.DataFrame([[file,1,0,0,0,1,0,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,1,4]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Peru':
-                        df_ = pd.DataFrame([[file,1,0,0,0,0,1,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,1,5]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Venezula':
-                        df_ = pd.DataFrame([[file,1,0,0,0,0,0,1]], columns=columns_)
+                        df_ = pd.DataFrame([[file,1,6]], columns=columns_)
                         df = df.append(df_)
                         
-                elif path[-1] == 'M':
+                elif path[-1] == 'F':
                     if country == 'Argentina':
-                        df_ = pd.DataFrame([[file,0,1,1,0,0,0,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,0,2]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Chile':
-                        df_ = pd.DataFrame([[file,0,1,0,1,0,0,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,0,3]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Colombia':
-                        df_ = pd.DataFrame([[file,0,1,0,0,1,0,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,0,4]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Peru':
-                        df_ = pd.DataFrame([[file,0,1,0,0,0,1,0]], columns=columns_)
+                        df_ = pd.DataFrame([[file,0,5]], columns=columns_)
                         df = df.append(df_)
                     elif country == 'Venezula':
-                        df_ = pd.DataFrame([[file,0,1,0,0,0,0,1]], columns=columns_)
+                        df_ = pd.DataFrame([[file,0,6]], columns=columns_)
                         df = df.append(df_)
                 else:
                     continue
@@ -181,21 +175,16 @@ def save_mfcc(dirpath, num_mfcc=13, n_fft=2048, hop_length=512, num_segments=5):
     mfcc_ = {}
     
     for f in os.listdir(dirpath):
-        # load audio file
         file_path = os.path.join(dirpath, f)
         signal, sample_rate = librosa.load(file_path, sr=SAMPLE_RATE)
 
-        # process all segments of audio file
         for d in range(num_segments):
-            # calculate start and finish sample for current segment
             start = samples_per_segment * d
             finish = start + samples_per_segment
 
-            # extract mfcc
             mfcc = librosa.feature.mfcc(signal[start:finish], sample_rate, n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
             mfcc = mfcc.T
 
-            # store only mfcc feature with expected number of vectors
             if len(mfcc) == num_mfcc_vectors_per_segment:
                 mfcc_.update({str(f): mfcc.tolist()})
     return mfcc_
