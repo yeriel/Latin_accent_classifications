@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import math
 import shutil
 import zipfile
 
@@ -168,6 +169,36 @@ def new_dataset(paths, dst, temp='../dataset/#Train/'):
                 shutil.move(f'{path}/{country}/{file}',dst)
     
     shutil.rmtree(temp)
+
+def save_mfcc(dirpath, num_mfcc=13, n_fft=2048, hop_length=512, num_segments=5):
+    SAMPLE_RATE = 22050
+    TRACK_DURATION = 7 # measured in seconds
+    SAMPLES_PER_TRACK = SAMPLE_RATE * TRACK_DURATION
+    
+    samples_per_segment = int(SAMPLES_PER_TRACK / num_segments)
+    num_mfcc_vectors_per_segment = math.ceil(samples_per_segment / hop_length)
+
+    mfcc_ = {}
+    
+    for f in os.listdir(dirpath):
+        # load audio file
+        file_path = os.path.join(dirpath, f)
+        signal, sample_rate = librosa.load(file_path, sr=SAMPLE_RATE)
+
+        # process all segments of audio file
+        for d in range(num_segments):
+            # calculate start and finish sample for current segment
+            start = samples_per_segment * d
+            finish = start + samples_per_segment
+
+            # extract mfcc
+            mfcc = librosa.feature.mfcc(signal[start:finish], sample_rate, n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
+            mfcc = mfcc.T
+
+            # store only mfcc feature with expected number of vectors
+            if len(mfcc) == num_mfcc_vectors_per_segment:
+                mfcc_.update({str(f): mfcc.tolist()})
+    return mfcc_
 
 if __name__ == "__main__":
     
