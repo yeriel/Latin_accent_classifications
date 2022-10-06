@@ -7,6 +7,7 @@ if __name__ == "__main__":
 
     dataset_csv = 'dataset/Train.csv'
     dataset_file = 'dataset/Train'
+    dataset_file_test = 'dataset/Test'
     paths = ['./dataset/#Train/F','./dataset/#Train/M']
 
     print(f'\nThis process may take a few minutes\nunzip folder')
@@ -40,11 +41,18 @@ if __name__ == "__main__":
     print(f'New Dataset\n')
     print(f'{df_.info()}')
 
-    print(f'\nExtract features audio mfcc')
-    dic_mfcc = save_mfcc(dataset_file, num_mfcc=13, n_fft=2048, hop_length=512, num_segments=5)
+    print(f'\nExtract features audio mfcc for train dataset')
+    dic_mfcc_train = save_mfcc(dataset_file, num_mfcc=13, n_fft=2048, hop_length=512, num_segments=5)
     print(f'done\n')
 
-    with open('./dataset/mfcc.json', 'wb') as fp:
-        pickle.dump(dic_mfcc, fp)
+    with open('./dataset/mfcc_train.json', 'wb') as fp:
+        pickle.dump(dic_mfcc_train, fp)
+    
+    print(f'\nExtract features audio mfcc for test dataset')
+    dic_mfcc_test = save_mfcc(dataset_file_test, num_mfcc=13, n_fft=2048, hop_length=512, num_segments=5)
+    print(f'done\n')
+
+    with open('./dataset/mfcc_test.json', 'wb') as fp:
+        pickle.dump(dic_mfcc_test, fp)
 
     print(f'Everything is ready to train models')
